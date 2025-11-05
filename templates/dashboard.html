@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Environmental Monitoring Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .dashboard {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .status-bar.normal {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .status-bar.warning {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        .status-text {
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        .timestamp {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .metric-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .metric-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+
+        .metric-label {
+            font-size: 1em;
+            color: #666;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .metric-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .metric-unit {
+            font-size: 1em;
+            color: #888;
+        }
+
+        .warnings {
+            margin-top: 30px;
+        }
+
+        .warning-box {
+            background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border-left: 5px solid #e17055;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .warning-text {
+            font-size: 1.2em;
+            color: #d63031;
+            font-weight: 600;
+        }
+
+        .no-warnings {
+            text-align: center;
+            padding: 30px;
+            color: #27ae60;
+            font-size: 1.3em;
+            font-weight: 600;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2em;
+            color: #666;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .chart-container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-top: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .chart-title {
+            font-size: 1.5em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        #myChart {
+            max-height: 400px;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            color: white;
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+
+        .update-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.9);
+            padding: 10px 20px;
+            border-radius: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            font-size: 0.9em;
+            color: #667eea;
+        }
+
+        .pulse-dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background: #27ae60;
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: pulse-dot 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+    </style>
+</head>
+<body>
+    <div class="update-indicator">
+        <span class="pulse-dot"></span>
+        <span id="update-text">Live Updates</span>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>🌡️ Environmental Monitoring System</h1>
+            <p>Real-Time Air Quality Dashboard</p>
+        </div>
+
+        <div class="dashboard">
+            <div id="status-bar" class="status-bar normal">
+                <div class="status-text" id="status">Loading...</div>
+                <div class="timestamp" id="timestamp">--</div>
+            </div>
+
+            <div class="metrics" id="metrics">
+                <div class="metric-card">
+                    <div class="metric-icon">💨</div>
+                    <div class="metric-label">CO2 Level</div>
+                    <div class="metric-value" id="co2-value">--</div>
+                    <div class="metric-unit">ppm</div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-icon">🌡️</div>
+                    <div class="metric-label">Temperature</div>
+                    <div class="metric-value" id="temp-value">--</div>
+                    <div class="metric-unit">°C</div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-icon">💧</div>
+                    <div class="metric-label">Humidity</div>
+                    <div class="metric-value" id="humidity-value">--</div>
+                    <div class="metric-unit">%</div>
+                </div>
+            </div>
+
+            <div class="warnings" id="warnings-section">
+                <!-- Warnings will be inserted here -->
+            </div>
+
+            <div class="chart-container">
+                <div class="chart-title">📊 Current Reading Visualization</div>
+                <canvas id="myChart"></canvas>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Updates every 3 seconds • Data refreshed every 20 seconds</p>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        let myChart = null;
+
+        function updateChart(co2, temp, humidity) {
+            const ctx = document.getElementById('myChart').getContext('2d');
+            
+            // Destroy previous chart if it exists
+            if (myChart) {
+                myChart.destroy();
+            }
+
+            // Create new chart with current data
+            myChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['CO₂ (ppm)', 'Temperature (°C)', 'Humidity (%)'],
+                    datasets: [{
+                        label: 'Current Reading',
+                        data: [co2, temp, humidity],
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.6)',
+                            'rgba(54, 162, 235, 0.6)',
+                            'rgba(75, 192, 192, 0.6)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(75, 192, 192, 1)'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                font: {
+                                    size: 12
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                font: {
+                                    size: 13,
+                                    weight: 'bold'
+                                }
+                            },
+                            grid: {
+                                display: false
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            padding: 12,
+                            titleFont: {
+                                size: 14
+                            },
+                            bodyFont: {
+                                size: 13
+                            },
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    if (label) {
+                                        label = label.split(' ')[0]; // Get metric name
+                                    }
+                                    return label + ': ' + context.parsed.y;
+                                }
+                            }
+                        }
+                    },
+                    animation: {
+                        duration: 1000,
+                        easing: 'easeInOutQuart'
+                    }
+                }
+            });
+        }
+
+        function updateDashboard() {
+            fetch('/api/current')
+                .then(response => response.json())
+                .then(data => {
+                    // Update metrics
+                    const co2 = data.co2 || 0;
+                    const temp = data.temperature || 0;
+                    const humidity = data.humidity || 0;
+
+                    document.getElementById('co2-value').textContent = co2 || '--';
+                    document.getElementById('temp-value').textContent = temp || '--';
+                    document.getElementById('humidity-value').textContent = humidity || '--';
+
+                    // Update status
+                    const statusBar = document.getElementById('status-bar');
+                    const statusText = document.getElementById('status');
+                    statusText.textContent = data.status || 'No Data';
+
+                    if (data.status === 'Warning') {
+                        statusBar.className = 'status-bar warning';
+                    } else {
+                        statusBar.className = 'status-bar normal';
+                    }
+
+                    // Update timestamp
+                    if (data.timestamp) {
+                        const date = new Date(data.timestamp);
+                        document.getElementById('timestamp').textContent = 
+                            'Last Updated: ' + date.toLocaleString();
+                    }
+
+                    // Update warnings
+                    const warningsSection = document.getElementById('warnings-section');
+                    if (data.warnings && data.warnings.length > 0) {
+                        warningsSection.innerHTML = data.warnings.map(warning => 
+                            `<div class="warning-box">
+                                <div class="warning-text">${warning}</div>
+                            </div>`
+                        ).join('');
+                    } else {
+                        warningsSection.innerHTML = 
+                            '<div class="no-warnings">✅ All parameters are normal</div>';
+                    }
+
+                    // Update chart with current readings
+                    if (co2 > 0 || temp > 0 || humidity > 0) {
+                        updateChart(co2, temp, humidity);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching data:', error);
+                    document.getElementById('status').textContent = 'Connection Error';
+                });
+        }
+
+        // Update immediately on load
+        updateDashboard();
+
+        // Update every 3 seconds
+        setInterval(updateDashboard, 3000);
+    </script>
+</body>
+</html>

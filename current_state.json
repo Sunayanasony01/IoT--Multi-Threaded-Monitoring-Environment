@@ -1,0 +1,11 @@
+{
+  "co2": 880.0,
+  "temperature": 25.0,
+  "humidity": 52.0,
+  "status": "Warning",
+  "warnings": [
+    "\u26a0\ufe0f Warning: High Temperature (25.0 > 22)",
+    "\u26a0\ufe0f Warning: High Humidity (52.0 > 45)"
+  ],
+  "timestamp": "2025-11-06T01:20:57.963077"
+}

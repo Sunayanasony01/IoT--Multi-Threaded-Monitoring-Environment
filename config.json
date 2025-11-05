@@ -1,0 +1,18 @@
+{
+  "device_name": "Main Office Sensor",
+  "api_key": "EYB7HYC5QHZK0RHX",
+  "data_file": "data.csv",
+  "update_interval": 20,
+  "temperature_limit": 22,
+  "humidity_limit": 45,
+  "email": {
+    "enabled": true,
+    "smtp_server": "smtp.gmail.com",
+    "smtp_port": 587,
+    "use_tls": true,
+    "from_addr": "dummyyy5349@gmail.com",
+    "to_addr": "dummyyy5349@gmail.com",
+    "username": "dummyyy5349@gmail.com",
+    "password": "vqqx hqua dzlf krvc"
+  }
+}
