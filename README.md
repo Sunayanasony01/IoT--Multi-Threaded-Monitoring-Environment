@@ -1,322 +1,641 @@
-# 🌡️ Multi-Threaded Environmental Monitoring System
+# 🌡️ IoT Multi-Threaded Environmental Monitoring System# 🌡️ Multi-Threaded Environmental Monitoring System
 
-A real-time IoT environmental monitoring system that reads sensor data from CSV files, displays live readings on an interactive web dashboard, monitors threshold violations, and sends automated email alerts.
 
-## 📋 Table of Contents
+
+A real-time IoT environmental monitoring system with **live weather API integration** and **CSV simulation modes**. Features multi-threaded architecture, interactive web dashboard, cloud data backup, and automated email alerts.A real-time IoT environmental monitoring system that reads sensor data from CSV files, displays live readings on an interactive web dashboard, monitors threshold violations, and sends automated email alerts.
+
+
+
+---## 📋 Table of Contents
+
 - [Quick Start Guide](#-quick-start-guide)
-- [Overview](#overview)
+
+## ✨ Features- [Overview](#overview)
+
 - [Features](#features)
-- [System Architecture](#system-architecture)
-- [Technology Stack](#technology-stack)
-- [Project Structure](#project-structure)
-- [Installation & Setup](#installation--setup)
-- [Configuration](#configuration)
-- [Usage](#usage)
-- [Dashboard Features](#dashboard-features)
+
+- 🌤️ **Live Weather Data**: Real-time temperature, humidity, and air quality from WeatherAPI.com- [System Architecture](#system-architecture)
+
+- 📊 **Interactive Dashboard**: Beautiful Streamlit web interface with color-coded gauge charts- [Technology Stack](#technology-stack)
+
+- 🔄 **Multi-Threading**: Concurrent data fetching and dashboard updates- [Project Structure](#project-structure)
+
+- ☁️ **Cloud Integration**: Automatic data backup to ThingSpeak IoT platform- [Installation & Setup](#installation--setup)
+
+- 📧 **Email Alerts**: Automated Gmail notifications when thresholds are exceeded- [Configuration](#configuration)
+
+- 📈 **Dual Modes**: Switch between live API data or CSV file simulation- [Usage](#usage)
+
+- 🎨 **Visual Indicators**: Color-coded zones (green/yellow/red) for easy monitoring- [Dashboard Features](#dashboard-features)
+
 - [How It Works](#how-it-works)
-- [Threshold Monitoring](#threshold-monitoring)
+
+---- [Threshold Monitoring](#threshold-monitoring)
+
 - [Email Alerts](#email-alerts)
-- [API Integration](#api-integration)
 
----
+## 🚀 Quick Start- [API Integration](#api-integration)
 
-## 🚀 Quick Start Guide
 
-**For someone forking/cloning this project for the first time:**
+
+See **[START.md](START.md)** for the complete step-by-step guide!---
+
+
+
+**TL;DR:**## 🚀 Quick Start Guide
+
+```bash
+
+# 1. Install dependencies**For someone forking/cloning this project for the first time:**
+
+pip install requests streamlit plotly
 
 ### ⚡ Option 1: Automated Setup (Recommended)
 
+# 2. Configure your API keys in config.json
+
 Just run the setup script - it does everything for you!
 
-```bash
+# 3. Run the system
+
+python main_api.py```bash
+
 # Clone the repository
-git clone <repository-url>
-cd A-Multi-Threaded-Environmental-Monitoring-System-main-2
+
+# 4. In a new terminal, launch dashboardgit clone <repository-url>
+
+streamlit run streamlit_dashboard.py --server.port 8505cd A-Multi-Threaded-Environmental-Monitoring-System-main-2
+
+```
 
 # Run the automated setup script
-./setup_and_run.sh
+
+Open browser: **http://localhost:8505**./setup_and_run.sh
+
 ```
+
+---
 
 The script will automatically:
-- ✅ Check Python installation
+
+## 📁 Project Structure- ✅ Check Python installation
+
 - ✅ Install required packages (streamlit, plotly, requests)
-- ✅ Create config.json from template
-- ✅ Initialize row tracker
-- ✅ Validate data files
-- ✅ Launch the dashboard at http://localhost:8505
 
-**That's it!** The system will start automatically. 🎉
+```- ✅ Create config.json from template
 
----
+IoT--Multi-Threaded-Monitoring-Environment/- ✅ Initialize row tracker
 
-### 🔧 Option 2: Manual Setup
+├── main_api.py                 # Entry point for live weather API mode- ✅ Validate data files
 
-If you prefer to set up manually:
+├── main_csv.py                 # Entry point for CSV simulation mode- ✅ Launch the dashboard at http://localhost:8505
 
-#### Step 1: Clone the Repository
+├── api_weather_device.py       # Weather API sensor class
+
+├── csv_device.py               # CSV simulator sensor class**That's it!** The system will start automatically. 🎉
+
+├── streamlit_dashboard.py      # Web dashboard interface
+
+├── config.json                 # Configuration file (API keys, thresholds)---
+
+├── current_state.json          # Live data state (auto-generated)
+
+├── data.csv                    # Sample sensor data for simulation### 🔧 Option 2: Manual Setup
+
+├── setup_and_run.sh           # Automated setup script
+
+├── README.md                   # This fileIf you prefer to set up manually:
+
+└── START.md                    # Quick start guide
+
+```#### Step 1: Clone the Repository
+
 ```bash
-# Clone the repository
+
+---# Clone the repository
+
 git clone <repository-url>
-cd A-Multi-Threaded-Environmental-Monitoring-System-main-2
 
-# Or if you downloaded as ZIP, extract and navigate to the folder
-cd A-Multi-Threaded-Environmental-Monitoring-System-main-2
-```
+## 🏗️ System Architecturecd A-Multi-Threaded-Environmental-Monitoring-System-main-2
 
-#### Step 2: Install Dependencies
-```bash
-# Option 1: Using pip
-pip install streamlit plotly requests
 
-# Option 2: Using conda (recommended)
-conda install -c conda-forge streamlit plotly requests
-```
 
-#### Step 3: Set Up Configuration
-```bash
-# Copy the template to create your config file
-cp config.template.json config.json
+```# Or if you downloaded as ZIP, extract and navigate to the folder
 
-# Edit config.json with your details (use any text editor)
-# You need to add:
-# - ThingSpeak API key (get free at thingspeak.com)
-# - Gmail credentials for alerts (optional - can disable)
-```
+┌─────────────────────────────────────────────────────────────┐cd A-Multi-Threaded-Environmental-Monitoring-System-main-2
 
-**Minimal config.json to get started** (without email alerts):
+│                    LIVE API MODE                            │```
+
+├─────────────────────────────────────────────────────────────┤
+
+│                                                             │#### Step 2: Install Dependencies
+
+│  Thread 1: Data Fetcher          Thread 2: Dashboard       │```bash
+
+│  ┌─────────────────────┐         ┌─────────────────────┐  │# Option 1: Using pip
+
+│  │  WeatherAPI.com     │         │   Streamlit Web     │  │pip install streamlit plotly requests
+
+│  │  (every 20 sec)     │────────▶│   Dashboard         │  │
+
+│  │                     │  JSON   │   (auto-refresh)    │  │# Option 2: Using conda (recommended)
+
+│  │  • Fetch temp       │  file   │                     │  │conda install -c conda-forge streamlit plotly requests
+
+│  │  • Fetch humidity   │         │  • Gauge charts     │  │```
+
+│  │  • Fetch AQI        │         │  • Live updates     │  │
+
+│  │  • Check thresholds │         │  • Color zones      │  │#### Step 3: Set Up Configuration
+
+│  │  • Send alerts      │         │                     │  │```bash
+
+│  │  • Upload to cloud  │         │                     │  │# Copy the template to create your config file
+
+│  └─────────────────────┘         └─────────────────────┘  │cp config.template.json config.json
+
+│         │                                                   │
+
+│         ├──▶ Gmail SMTP (Email Alerts)                     │# Edit config.json with your details (use any text editor)
+
+│         └──▶ ThingSpeak API (Cloud Backup)                 │# You need to add:
+
+│                                                             │# - ThingSpeak API key (get free at thingspeak.com)
+
+└─────────────────────────────────────────────────────────────┘# - Gmail credentials for alerts (optional - can disable)
+
+``````
+
+
+
+---**Minimal config.json to get started** (without email alerts):
+
 ```json
-{
+
+## ⚙️ Configuration{
+
   "device_name": "Test Sensor",
-  "api_key": "YOUR_THINGSPEAK_KEY",
+
+Edit `config.json` to customize your setup:  "api_key": "YOUR_THINGSPEAK_KEY",
+
   "data_file": "data.csv",
-  "update_interval": 20,
-  "temperature_limit": 22,
-  "humidity_limit": 45,
-  "co2_limit": 1000,
-  "email": {
-    "enabled": false
+
+```json  "update_interval": 20,
+
+{  "temperature_limit": 22,
+
+  "device_name": "Live Weather Sensor - Bangalore",  "humidity_limit": 45,
+
+  "api_key": "YOUR_THINGSPEAK_API_KEY",  "co2_limit": 1000,
+
+  "update_interval": 20,  "email": {
+
+  "temperature_limit": 22,    "enabled": false
+
+  "humidity_limit": 45,  }
+
+  "co2_limit": 1000,}
+
+  "weather_api": {```
+
+    "api_key": "YOUR_WEATHERAPI_KEY",
+
+    "city": "Bangalore",#### Step 4: Initialize Tracker File
+
+    "country_code": "IN"```bash
+
+  },# Create the row tracker (starts from first row)
+
+  "email": {echo "0" > row_tracker.txt
+
+    "enabled": true,```
+
+    "smtp_server": "smtp.gmail.com",
+
+    "smtp_port": 587,#### Step 5: Run the Application
+
+    "from_addr": "your-email@gmail.com",```bash
+
+    "to_addr": "alert-email@gmail.com",# Start the system
+
+    "username": "your-email@gmail.com",python3 main_csv.py
+
+    "password": "your-app-password"```
+
   }
-}
+
+}#### Step 6: Access the Dashboard
+
+```Open your browser and go to:
+
 ```
 
-#### Step 4: Initialize Tracker File
-```bash
-# Create the row tracker (starts from first row)
-echo "0" > row_tracker.txt
+### 🔑 Getting API Keyshttp://localhost:8505
+
 ```
 
-#### Step 5: Run the Application
-```bash
-# Start the system
-python3 main_csv.py
-```
+**WeatherAPI.com (Required for Live Mode):**
 
-#### Step 6: Access the Dashboard
-Open your browser and go to:
-```
-http://localhost:8505
-```
+1. Go to https://www.weatherapi.com/signup.aspx**That's it!** 🎉 The system will start reading sensor data every 20 seconds and display it on the dashboard.
 
-**That's it!** 🎉 The system will start reading sensor data every 20 seconds and display it on the dashboard.
+2. Sign up for free account (1M calls/month)
 
----
+3. Copy your API key from dashboard---
+
+4. Add to `config.json` → `weather_api.api_key`
 
 ### 📝 Quick Commands Reference
 
-| Command | Purpose |
-|---------|---------|
-| `./setup_and_run.sh` | **🚀 Automated setup and run (easiest!)** |
-| `python3 main_csv.py` | Start the monitoring system manually |
-| `Ctrl + C` | Stop the system |
+**ThingSpeak (Optional - Cloud Backup):**
+
+1. Go to https://thingspeak.com/| Command | Purpose |
+
+2. Create a free account|---------|---------|
+
+3. Create a new channel with 3 fields (CO₂, Temp, Humidity)| `./setup_and_run.sh` | **🚀 Automated setup and run (easiest!)** |
+
+4. Copy Write API Key| `python3 main_csv.py` | Start the monitoring system manually |
+
+5. Add to `config.json` → `api_key`| `Ctrl + C` | Stop the system |
+
 | `echo "0" > row_tracker.txt` | Reset to first row |
-| `cat current_state.json` | View current readings |
-| `tail -f row_tracker.txt` | Monitor progress |
-| `chmod +x setup_and_run.sh` | Make setup script executable (if needed) |
 
----
+**Gmail App Password (Optional - Email Alerts):**| `cat current_state.json` | View current readings |
 
-## 🎯 Overview
+1. Enable 2-Step Verification on your Google account| `tail -f row_tracker.txt` | Monitor progress |
 
-This project simulates an IoT environmental monitoring system for indoor air quality management. It reads sensor data (CO₂, Temperature, Humidity) from a CSV file sequentially, processes each reading with configurable time intervals, displays the data on a modern web dashboard, and triggers alerts when values exceed predefined thresholds.
+2. Go to https://myaccount.google.com/apppasswords| `chmod +x setup_and_run.sh` | Make setup script executable (if needed) |
 
-**Use Case**: Office building environmental monitoring, smart home automation, data center climate control, greenhouse management.
+3. Generate new app password for "Mail"
 
----
+4. Add to `config.json` → `email.password`---
 
-## ✨ Features
+
+
+---## 🎯 Overview
+
+
+
+## 📊 Dashboard FeaturesThis project simulates an IoT environmental monitoring system for indoor air quality management. It reads sensor data (CO₂, Temperature, Humidity) from a CSV file sequentially, processes each reading with configurable time intervals, displays the data on a modern web dashboard, and triggers alerts when values exceed predefined thresholds.
+
+
+
+The Streamlit dashboard displays:**Use Case**: Office building environmental monitoring, smart home automation, data center climate control, greenhouse management.
+
+
+
+- **Temperature Gauge**: Color-coded temperature monitoring---
+
+  - 🟢 Green: Below threshold (safe)
+
+  - 🟡 Yellow: Approaching threshold## ✨ Features
+
+  - 🔴 Red: Above threshold (alert!)
 
 ### Core Functionality
-- ✅ **Sequential CSV Data Processing** - Reads sensor data row-by-row with configurable intervals (default: 20 seconds)
-- ✅ **Non-Destructive Reading** - Preserves original CSV data using a position tracker system
-- ✅ **Real-Time Web Dashboard** - Interactive Streamlit-based UI with auto-refresh
-- ✅ **Multi-Threaded Architecture** - Concurrent data processing and web serving
+
+- **Humidity Gauge**: Real-time humidity percentage- ✅ **Sequential CSV Data Processing** - Reads sensor data row-by-row with configurable intervals (default: 20 seconds)
+
+  - 🟢 Green: Below 45%- ✅ **Non-Destructive Reading** - Preserves original CSV data using a position tracker system
+
+  - 🟡 Yellow: 45-60%- ✅ **Real-Time Web Dashboard** - Interactive Streamlit-based UI with auto-refresh
+
+  - 🔴 Red: Above 60%- ✅ **Multi-Threaded Architecture** - Concurrent data processing and web serving
+
 - ✅ **Threshold Monitoring** - Automatic detection of abnormal readings
-- ✅ **Email Alerts** - SMTP-based notifications when thresholds are exceeded
-- ✅ **Cloud Integration** - Automatic data upload to ThingSpeak IoT platform
-- ✅ **Professional Visualization** - Gauge charts with color-coded zones
+
+- **CO₂ Gauge**: Air quality monitoring (converted from AQI)- ✅ **Email Alerts** - SMTP-based notifications when thresholds are exceeded
+
+  - 🟢 Green: Below 1000 ppm- ✅ **Cloud Integration** - Automatic data upload to ThingSpeak IoT platform
+
+  - 🟡 Yellow: 1000-1500 ppm- ✅ **Professional Visualization** - Gauge charts with color-coded zones
+
+  - 🔴 Red: Above 1500 ppm
 
 ### Dashboard Features
-- 🎯 **Real-Time Gauge Charts** - Separate gauges for each metric with appropriate scales
-- 📊 **Live Metric Cards** - Current readings with color-coded status indicators
-- 🔔 **Alert Notifications** - Visual warnings when thresholds are exceeded
+
+- **Real-time Updates**: Auto-refresh every 2 seconds- 🎯 **Real-Time Gauge Charts** - Separate gauges for each metric with appropriate scales
+
+- **Live Alerts**: Visual warnings when thresholds exceeded- 📊 **Live Metric Cards** - Current readings with color-coded status indicators
+
+- **Timestamp**: Last update time display- 🔔 **Alert Notifications** - Visual warnings when thresholds are exceeded
+
 - 📍 **Row Progress Tracker** - Shows current position in dataset
-- ⏱️ **System Status Footer** - Displays update interval, email status, and timestamp
+
+---- ⏱️ **System Status Footer** - Displays update interval, email status, and timestamp
+
 - 🎨 **Responsive Design** - Professional IoT dashboard styling
 
+## 🔧 How It Works
+
 ---
+
+### Live API Mode (`main_api.py`)
 
 ## 🏗️ System Architecture
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                     Main Application                         │
-│                    (main_csv.py)                             │
-└────────────────────────┬────────────────────────────────────┘
+1. **Initialization**: Loads config, validates API keys
+
+2. **Background Thread**: Starts weather data fetcher```
+
+3. **API Polling**: Fetches data from WeatherAPI.com every 20 seconds┌─────────────────────────────────────────────────────────────┐
+
+4. **Data Processing**: │                     Main Application                         │
+
+   - Extracts temperature, humidity, air quality│                    (main_csv.py)                             │
+
+   - Converts AQI to CO₂ equivalent└────────────────────────┬────────────────────────────────────┘
+
+   - Checks threshold violations                         │
+
+5. **Alert System**: Sends email if thresholds exceeded                    ┌────▼────┐
+
+6. **Cloud Backup**: Uploads to ThingSpeak                    │ Config  │
+
+7. **State Update**: Saves to `current_state.json`                    │  Loader │
+
+8. **Dashboard**: Streamlit reads state file and displays live gauges                    └────┬────┘
+
                          │
-                    ┌────▼────┐
-                    │ Config  │
-                    │  Loader │
-                    └────┬────┘
-                         │
-        ┌────────────────┴────────────────┐
+
+### CSV Simulation Mode (`main_csv.py`)        ┌────────────────┴────────────────┐
+
         │                                  │
-   ┌────▼─────┐                    ┌──────▼────────┐
-   │  Thread 1│                    │   Thread 2    │
-   │CSV Sensor│                    │   Streamlit   │
-   │ Processor│                    │   Dashboard   │
+
+- Reads sensor data from `data.csv` row by row   ┌────▼─────┐                    ┌──────▼────────┐
+
+- Simulates real sensor readings   │  Thread 1│                    │   Thread 2    │
+
+- Same dashboard, alerts, and cloud features   │CSV Sensor│                    │   Streamlit   │
+
+- Useful for testing without API dependencies   │ Processor│                    │   Dashboard   │
+
    └────┬─────┘                    └──────┬────────┘
-        │                                  │
+
+---        │                                  │
+
         │  ┌──────────────────────────┐   │
-        ├─►│   data.csv (Source)      │   │
+
+## 🎯 Threshold Monitoring        ├─►│   data.csv (Source)      │   │
+
         │  └──────────────────────────┘   │
-        │                                  │
+
+The system monitors three key environmental parameters:        │                                  │
+
         │  ┌──────────────────────────┐   │
-        ├─►│ row_tracker.txt (Index)  │   │
-        │  └──────────────────────────┘   │
-        │                                  │
-        │  ┌──────────────────────────┐   │
-        ├─►│ current_state.json       │◄──┤
+
+| Parameter | Default Threshold | Configured In |        ├─►│ row_tracker.txt (Index)  │   │
+
+|-----------|------------------|---------------|        │  └──────────────────────────┘   │
+
+| Temperature | 22°C | `temperature_limit` |        │                                  │
+
+| Humidity | 45% | `humidity_limit` |        │  ┌──────────────────────────┐   │
+
+| CO₂ Level | 1000 ppm | `co2_limit` |        ├─►│ current_state.json       │◄──┤
+
         │  │ (Shared State)           │   │
-        │  └──────────────────────────┘   │
+
+When any parameter exceeds its threshold:        │  └──────────────────────────┘   │
+
+- 📧 Email alert sent (if enabled)        │                                  │
+
+- 🔴 Dashboard shows red zone        │  ┌──────────────────────────┐   │
+
+- ⚠️ Console warning logged        ├─►│ ThingSpeak API           │   │
+
+- ☁️ Data uploaded to cloud for analysis        │  └──────────────────────────┘   │
+
         │                                  │
-        │  ┌──────────────────────────┐   │
-        ├─►│ ThingSpeak API           │   │
-        │  └──────────────────────────┘   │
-        │                                  │
-        │  ┌──────────────────────────┐   │
+
+---        │  ┌──────────────────────────┐   │
+
         └─►│ SMTP Email Server        │   │
-           └──────────────────────────┘   │
+
+## 📧 Email Alerts           └──────────────────────────┘   │
+
                                            │
-                                    ┌──────▼────────┐
+
+When thresholds are violated, the system sends detailed email alerts:                                    ┌──────▼────────┐
+
                                     │  Web Browser  │
-                                    │ (localhost:   │
+
+**Subject:** `⚠️ Environmental Alert from [Device Name]`                                    │ (localhost:   │
+
                                     │     8505)     │
-                                    └───────────────┘
-```
 
----
+**Contains:**                                    └───────────────┘
 
-## 🛠️ Technology Stack
+- 🌡️ Current temperature vs threshold```
 
-### Backend
-- **Python 3.x** - Core programming language
-- **Threading** - Concurrent execution of sensor reading and web dashboard
-- **CSV Module** - Data file handling
-- **SMTP (smtplib)** - Email alert system
+- 💧 Current humidity vs threshold
+
+- 💨 Current CO₂ level vs threshold---
+
+- ⏰ Timestamp of violation
+
+- 📍 Location information## 🛠️ Technology Stack
+
+
+
+**Setup:**### Backend
+
+1. Use Gmail with 2-Step Verification- **Python 3.x** - Core programming language
+
+2. Generate App Password (see Configuration section)- **Threading** - Concurrent execution of sensor reading and web dashboard
+
+3. Add credentials to `config.json`- **CSV Module** - Data file handling
+
+4. Set `email.enabled: true`- **SMTP (smtplib)** - Email alert system
+
 - **Requests** - HTTP API calls to ThingSpeak
 
-### Frontend
-- **Streamlit** - Modern web dashboard framework
-- **Plotly** - Interactive gauge chart visualizations
-- **Custom CSS** - Professional styling and layout
-
-### APIs & Services
-- **ThingSpeak** - IoT data platform for cloud storage and analytics
-- **Gmail SMTP** - Email notification delivery
-
-### Data Storage
-- **CSV Files** - Sensor data storage
-- **JSON Files** - Configuration and state management
-- **Text Files** - Row position tracking
-
 ---
 
-## 📁 Project Structure
+### Frontend
+
+## 🌐 Two Operating Modes- **Streamlit** - Modern web dashboard framework
+
+- **Plotly** - Interactive gauge chart visualizations
+
+### 🌤️ Live Weather Mode (Recommended)- **Custom CSS** - Professional styling and layout
+
+```bash
+
+python main_api.py### APIs & Services
+
+```- **ThingSpeak** - IoT data platform for cloud storage and analytics
+
+- Real-time data from WeatherAPI.com- **Gmail SMTP** - Email notification delivery
+
+- Actual weather conditions for your city
+
+- Best for production/demo### Data Storage
+
+- **CSV Files** - Sensor data storage
+
+### 📊 CSV Simulation Mode- **JSON Files** - Configuration and state management
+
+```bash- **Text Files** - Row position tracking
+
+python main_csv.py
+
+```---
+
+- Reads from `data.csv` file
+
+- Useful for testing/development## 📁 Project Structure
+
+- No API key required
 
 ```
-A-Multi-Threaded-Environmental-Monitoring-System/
+
+**Both modes** use the same dashboard!A-Multi-Threaded-Environmental-Monitoring-System/
+
 │
-├── setup_and_run.sh            # 🚀 Automated setup and launch script
+
+---├── setup_and_run.sh            # 🚀 Automated setup and launch script
+
 │
-├── main_csv.py                 # Main entry point - starts both threads
+
+## 🛠️ Technology Stack├── main_csv.py                 # Main entry point - starts both threads
+
 ├── csv_device.py               # Core sensor reading and processing logic
-├── streamlit_dashboard.py      # Web dashboard UI
+
+- **Python 3.12+**├── streamlit_dashboard.py      # Web dashboard UI
+
+- **Streamlit**: Web dashboard framework│
+
+- **Plotly**: Interactive gauge visualizations├── config.json                 # System configuration (API keys, thresholds)
+
+- **Requests**: HTTP API calls├── config.template.json        # Template for configuration setup
+
+- **Threading**: Concurrent execution│
+
+- **WeatherAPI.com**: Live weather data├── data.csv                    # Sensor data source (25 rows of readings)
+
+- **ThingSpeak**: IoT cloud platform├── row_tracker.txt            # Tracks current row position
+
+- **Gmail SMTP**: Email notifications├── current_state.json         # Shared state between threads
+
 │
-├── config.json                 # System configuration (API keys, thresholds)
-├── config.template.json        # Template for configuration setup
-│
-├── data.csv                    # Sensor data source (25 rows of readings)
-├── row_tracker.txt            # Tracks current row position
-├── current_state.json         # Shared state between threads
-│
-└── README.md                   # This file
+
+---└── README.md                   # This file
+
 ```
+
+## 🐛 Troubleshooting
 
 ### File Descriptions
 
-#### `setup_and_run.sh`
-- **Type**: Bash script
-- **Purpose**: Automated setup and launch script
-- **Features**:
-  - Validates project directory and Python installation
-  - Auto-installs required packages (streamlit, plotly, requests)
-  - Creates config.json from template if needed
-  - Initializes row_tracker.txt
-  - Checks data.csv exists
-  - Launches the monitoring system
-  - Provides colorful, user-friendly progress output
-- **Usage**: `./setup_and_run.sh`
-- **Benefit**: One-command setup for new users
+**Dashboard not updating?**
 
-#### `main_csv.py`
-- Entry point for the application
-- Loads configuration from `config.json`
+- Check if `main_api.py` or `main_csv.py` is running#### `setup_and_run.sh`
+
+- Verify `current_state.json` is being updated- **Type**: Bash script
+
+- Refresh browser page- **Purpose**: Automated setup and launch script
+
+- **Features**:
+
+**API returning 401 error?**  - Validates project directory and Python installation
+
+- Verify API key in `config.json`  - Auto-installs required packages (streamlit, plotly, requests)
+
+- Check if WeatherAPI key is active  - Creates config.json from template if needed
+
+- Test with: `curl "http://api.weatherapi.com/v1/current.json?key=YOUR_KEY&q=Bangalore,IN&aqi=yes"`  - Initializes row_tracker.txt
+
+  - Checks data.csv exists
+
+**Email not sending?**  - Launches the monitoring system
+
+- Verify Gmail app password (not regular password!)  - Provides colorful, user-friendly progress output
+
+- Check 2-Step Verification is enabled- **Usage**: `./setup_and_run.sh`
+
+- Ensure `email.enabled: true` in config- **Benefit**: One-command setup for new users
+
+
+
+**Import errors (requests, streamlit, etc.)?**#### `main_csv.py`
+
+- Use correct Python: `python main_api.py` (not `python3`)- Entry point for the application
+
+- Install packages: `pip install requests streamlit plotly`- Loads configuration from `config.json`
+
 - Creates `CsvSensor` instance
-- Starts sensor reading in a background thread
+
+---- Starts sensor reading in a background thread
+
 - Launches Streamlit dashboard on port 8505
 
+## 📝 License
+
 #### `csv_device.py`
-- **Class**: `CsvSensor`
+
+This project is open source and available for educational purposes.- **Class**: `CsvSensor`
+
 - **Key Methods**:
-  - `_get_current_row_index()` - Reads current position from tracker
+
+---  - `_get_current_row_index()` - Reads current position from tracker
+
   - `_update_row_index(index)` - Updates position in tracker
-  - `_read_data_from_csv()` - Reads specific row from CSV
+
+## 👥 Contributing  - `_read_data_from_csv()` - Reads specific row from CSV
+
   - `_send_to_thingspeak()` - Uploads data to cloud platform
-  - `_send_email_alert()` - Sends SMTP email notifications
+
+Feel free to fork, modify, and create pull requests!  - `_send_email_alert()` - Sends SMTP email notifications
+
   - `run_simulation()` - Main loop that processes data every 20 seconds
 
-#### `streamlit_dashboard.py`
-- **Functions**:
-  - `load_config()` - Loads system configuration
-  - `load_current_data()` - Reads latest sensor data
-  - `get_row_info()` - Gets current row progress
-  - `create_enhanced_visualization()` - Creates gauge charts
-  - `main()` - Dashboard layout and rendering
+**Possible Enhancements:**
 
-#### `config.json`
+- Add more weather parameters (wind speed, pressure, etc.)#### `streamlit_dashboard.py`
+
+- Historical data graphs- **Functions**:
+
+- Multiple location monitoring  - `load_config()` - Loads system configuration
+
+- Mobile app integration  - `load_current_data()` - Reads latest sensor data
+
+- Database storage (PostgreSQL, MongoDB)  - `get_row_info()` - Gets current row progress
+
+- Docker containerization  - `create_enhanced_visualization()` - Creates gauge charts
+
+- REST API endpoints  - `main()` - Dashboard layout and rendering
+
+
+
+---#### `config.json`
+
 - Contains all system settings:
-  - Device name and API credentials
+
+## 🙏 Acknowledgments  - Device name and API credentials
+
   - Data file path and update interval
-  - Threshold values for alerts
-  - Email configuration (server, credentials, recipients)
 
-#### `data.csv`
+- **WeatherAPI.com**: Free weather data API  - Threshold values for alerts
+
+- **ThingSpeak**: IoT cloud platform  - Email configuration (server, credentials, recipients)
+
+- **Streamlit**: Amazing dashboard framework
+
+- **Plotly**: Beautiful visualizations#### `data.csv`
+
 - Contains 25 rows of sensor readings
-- Format: `CO2,Temperature,Humidity`
-- Example: `400,22,40` (400 ppm CO₂, 22°C, 40% humidity)
-- Data is preserved (not deleted) during processing
 
-#### `row_tracker.txt`
+---- Format: `CO2,Temperature,Humidity`
+
+- Example: `400,22,40` (400 ppm CO₂, 22°C, 40% humidity)
+
+**Made with ❤️ for IoT Environmental Monitoring**- Data is preserved (not deleted) during processing
+
+
+
+Need help? Check **[START.md](START.md)** for detailed setup instructions!#### `row_tracker.txt`
+
 - Simple text file storing current row index
 - Allows system to resume from last position
 - Prevents data duplication

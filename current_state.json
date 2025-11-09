@@ -1,11 +1,13 @@
 {
-  "co2": 880.0,
-  "temperature": 25.0,
-  "humidity": 52.0,
-  "status": "Warning",
+  "co2": 600,
+  "temperature": 23.4,
+  "humidity": 57,
+  "status": "\u26a0\ufe0f  WARNING",
   "warnings": [
-    "\u26a0\ufe0f Warning: High Temperature (25.0 > 22)",
-    "\u26a0\ufe0f Warning: High Humidity (52.0 > 45)"
+    "\u26a0\ufe0f  High Temperature: 23.4\u00b0C > 22\u00b0C",
+    "\u26a0\ufe0f  High Humidity: 57% > 45%"
   ],
-  "timestamp": "2025-11-06T01:20:57.963077"
+  "timestamp": "2025-11-09T19:57:30.748529",
+  "location": "Bangalore, IN",
+  "data_source": "WeatherAPI.com"
 }
