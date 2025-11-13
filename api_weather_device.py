@@ -32,9 +32,9 @@ class WeatherSensor:
         # WeatherAPI.com endpoint (includes both weather AND air quality!)
         self.weather_url = f"http://api.weatherapi.com/v1/current.json?key={weather_api_key}&q={city},{country_code}&aqi=yes"
         
-        print(f"🌤️  Weather Sensor '{self.name}' initialized for {self.city}, {self.country_code}")
+        print(f" Weather Sensor '{self.name}' initialized for {self.city}, {self.country_code}")
         print(f"📡 Fetching live data from WeatherAPI.com")
-        print(f"🔑 Debug - API URL: {self.weather_url}")
+        print(f"Debug - API URL: {self.weather_url}")
 
     def fetch_live_weather_data(self):
         """
@@ -48,9 +48,9 @@ class WeatherSensor:
             response = requests.get(self.weather_url, timeout=10)
             
             if response.status_code != 200:
-                print(f"[{self.name}] ⚠️  Weather API returned status code {response.status_code}")
+                print(f"[{self.name}]  Weather API returned status code {response.status_code}")
                 if response.status_code == 403:
-                    print(f"[{self.name}] ⚠️  API key may be invalid or not activated yet")
+                    print(f"[{self.name}]  API key may be invalid or not activated yet")
                 return None, None, None
             
             data = response.json()
@@ -89,25 +89,25 @@ class WeatherSensor:
                     co2_from_co = 400 + (co / 10)
                     co2_equivalent = max(co2_equivalent, min(1500, co2_from_co))
                 
-                print(f"[{self.name}] 🌍 Air Quality Index: {us_epa_index} → CO₂ Equivalent: {co2_equivalent:.0f} ppm")
+                print(f"[{self.name}] Air Quality Index: {us_epa_index} → CO₂ Equivalent: {co2_equivalent:.0f} ppm")
             else:
-                print(f"[{self.name}] ⚠️  Air quality data not available, using baseline CO₂")
+                print(f"[{self.name}]  Air quality data not available, using baseline CO₂")
             
-            print(f"[{self.name}] ✅ Live data fetched: {temp}°C, {humidity}%, ~{co2_equivalent:.0f} ppm CO₂")
+            print(f"[{self.name}] Live data fetched: {temp}°C, {humidity}%, ~{co2_equivalent:.0f} ppm CO₂")
             
             return temp, humidity, co2_equivalent
             
         except requests.exceptions.Timeout:
-            print(f"[{self.name}] ⚠️  API request timed out")
+            print(f"[{self.name}]  API request timed out")
             return None, None, None
         except requests.exceptions.RequestException as e:
-            print(f"[{self.name}] ⚠️  Network error: {e}")
+            print(f"[{self.name}]  Network error: {e}")
             return None, None, None
         except KeyError as e:
-            print(f"[{self.name}] ⚠️  Unexpected API response format: {e}")
+            print(f"[{self.name}]  Unexpected API response format: {e}")
             return None, None, None
         except Exception as e:
-            print(f"[{self.name}] ⚠️  Error fetching weather data: {e}")
+            print(f"[{self.name}]  Error fetching weather data: {e}")
             return None, None, None
 
     def _send_email_alert(self, subject: str, body: str, email_cfg: dict):
@@ -131,10 +131,10 @@ class WeatherSensor:
                 server.login(username, password)
             server.send_message(msg)
             server.quit()
-            print(f"[{self.name}]   📧 Email alert sent to {email_cfg.get('to_addr')}")
+            print(f"[{self.name}]   Email alert sent to {email_cfg.get('to_addr')}")
             return True
         except Exception as e:
-            print(f"[{self.name}]   ⚠️  Failed to send email: {e}")
+            print(f"[{self.name}]    Failed to send email: {e}")
             return False
 
     def _send_to_thingspeak(self, co2, temp, humidity):
@@ -143,22 +143,22 @@ class WeatherSensor:
             url = f"https://api.thingspeak.com/update?api_key={self.api_key}&field1={co2:.1f}&field2={temp:.1f}&field3={humidity:.1f}"
             response = requests.get(url, timeout=10)
             if response.status_code == 200 and response.text != '0':
-                print(f"[{self.name}]   ☁️  ThingSpeak updated (Entry ID: {response.text})")
+                print(f"[{self.name}]    ThingSpeak updated (Entry ID: {response.text})")
                 return True
             else:
-                print(f"[{self.name}]   ⚠️  ThingSpeak update failed (Response: {response.text})")
+                print(f"[{self.name}]    ThingSpeak update failed (Response: {response.text})")
                 return False
         except Exception as e:
-            print(f"[{self.name}]   ⚠️  ThingSpeak error: {e}")
+            print(f"[{self.name}]    ThingSpeak error: {e}")
             return False
 
     def run_simulation(self):
         """
         Main loop: Fetch live weather data at regular intervals and process it
         """
-        print(f"[{self.name}]   🚀 Starting live weather monitoring...")
-        print(f"[{self.name}]   📍 Location: {self.city}, {self.country_code}")
-        print(f"[{self.name}]   ⏱️  Update interval: {self.interval} seconds")
+        print(f"[{self.name}]   Starting live weather monitoring...")
+        print(f"[{self.name}]   Location: {self.city}, {self.country_code}")
+        print(f"[{self.name}]    Update interval: {self.interval} seconds")
         print(f"[{self.name}]   {'='*60}\n")
         
         iteration = 0
@@ -167,14 +167,14 @@ class WeatherSensor:
             while True:
                 iteration += 1
                 print(f"\n{'='*60}")
-                print(f"[{self.name}]   📊 DATA FETCH #{iteration} - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+                print(f"[{self.name}]   DATA FETCH #{iteration} - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
                 print(f"{'='*60}")
                 
                 # Fetch live data from API
                 temp, humidity, co2_equivalent = self.fetch_live_weather_data()
                 
                 if temp is None or humidity is None or co2_equivalent is None:
-                    print(f"[{self.name}]   ⚠️  Failed to fetch data. Retrying in {self.interval} seconds...")
+                    print(f"[{self.name}]    Failed to fetch data. Retrying in {self.interval} seconds...")
                     time.sleep(self.interval)
                     continue
                 
@@ -184,7 +184,7 @@ class WeatherSensor:
                     with open('config.json', 'r') as f:
                         cfg = json.load(f)
                 except Exception as e:
-                    print(f"[{self.name}]   ⚠️  Could not load config: {e}")
+                    print(f"[{self.name}]    Could not load config: {e}")
                 
                 temp_limit = cfg.get('temperature_limit') if cfg else None
                 humid_limit = cfg.get('humidity_limit') if cfg else None
@@ -196,27 +196,27 @@ class WeatherSensor:
                 warnings = []
                 
                 if co2_limit is not None and co2_equivalent > float(co2_limit):
-                    warnings.append(f"⚠️  High CO₂: {co2_equivalent:.0f} ppm > {co2_limit} ppm")
+                    warnings.append(f"High CO2: {co2_equivalent:.0f} ppm > {co2_limit} ppm")
                 if temp_limit is not None and temp > float(temp_limit):
-                    warnings.append(f"⚠️  High Temperature: {temp}°C > {temp_limit}°C")
+                    warnings.append(f"High Temperature: {temp}°C > {temp_limit}°C")
                 if humid_limit is not None and humidity > float(humid_limit):
-                    warnings.append(f"⚠️  High Humidity: {humidity}% > {humid_limit}%")
+                    warnings.append(f"High Humidity: {humidity}% > {humid_limit}%")
                 
                 if warnings:
-                    status = "⚠️  WARNING"
+                    status = "WARNING"
                 
                 # Display live dashboard in terminal
                 print(f"\n{'─'*60}")
-                print(f"   🌡️  LIVE ENVIRONMENTAL MONITORING DASHBOARD")
+                print(f"   LIVE ENVIRONMENTAL MONITORING DASHBOARD")
                 print(f"{'─'*60}")
-                print(f"   📍 Location     : {self.city}, {self.country_code}")
-                print(f"   💨 CO₂ Level    : {co2_equivalent:.0f} ppm")
-                print(f"   🌡️  Temperature  : {temp}°C")
-                print(f"   💧 Humidity     : {humidity}%")
-                print(f"   📊 Status       : {status}")
+                print(f"   Location     : {self.city}, {self.country_code}")
+                print(f"   CO2 Level    : {co2_equivalent:.0f} ppm")
+                print(f"   Temperature  : {temp}°C")
+                print(f"   Humidity     : {humidity}%")
+                print(f"   Status       : {status}")
                 if warnings:
                     print(f"{'─'*60}")
-                    print("   🚨 ALERTS:")
+                    print("   ALERTS:")
                     for w in warnings:
                         print(f"      {w}")
                 print(f"{'─'*60}\n")
@@ -235,15 +235,15 @@ class WeatherSensor:
                     }
                     with open('current_state.json', 'w') as f:
                         json.dump(state, f, indent=2)
-                    print(f"[{self.name}]   💾 State saved for web dashboard")
+                    print(f"[{self.name}]   State saved for web dashboard")
                 except Exception as e:
-                    print(f"[{self.name}]   ⚠️  Failed to save state: {e}")
+                    print(f"[{self.name}]   Failed to save state: {e}")
                 
                 # Send email alerts if thresholds exceeded
                 if warnings and email_cfg and email_cfg.get('enabled'):
-                    subject = f"🚨 Environmental Alert from {self.name}"
+                    subject = f"Environmental Alert from {self.name}"
                     body = f"""
-⚠️  ENVIRONMENTAL THRESHOLD EXCEEDED ⚠️
+ENVIRONMENTAL THRESHOLD EXCEEDED
 
 Device: {self.name}
 Location: {self.city}, {self.country_code}
@@ -252,9 +252,9 @@ Data Source: WeatherAPI.com
 
 Current Readings:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-💨 CO₂ Level (AQI-based):  {co2_equivalent:.0f} ppm
-🌡️  Temperature:           {temp}°C
-💧 Humidity:              {humidity}%
+CO2 Level (AQI-based):  {co2_equivalent:.0f} ppm
+Temperature:            {temp}°C
+Humidity:               {humidity}%
 
 Alerts:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -272,7 +272,7 @@ This is an automated alert from your IoT Environmental Monitoring System.
                 self._send_to_thingspeak(co2_equivalent, temp, humidity)
                 
                 # Wait for next update
-                print(f"\n[{self.name}]   ⏳ Waiting {self.interval} seconds until next update...")
+                print(f"\n[{self.name}]   Waiting {self.interval} seconds until next update...")
                 print(f"{'='*60}\n")
                 time.sleep(self.interval)
                 
